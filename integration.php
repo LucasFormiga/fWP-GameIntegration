@@ -1,16 +1,16 @@
 <?php
 
 /**
- * Plugin Name: CdP Coins
- * Description: Integração com a loja de Coins
+ * Plugin Name: fWP-GameIntegration
+ * Description: WooCommerce integration with game database to auto activate the player purchase
  * Author: Lucas Formiga
- * Author URI: http://cdp-wow.com.br
+ * Author URI: https://github.com/LucasFormiga
  * Version: 1.4
  *
- * @package WooCommerce_CDP
+ * @package WooCommerce_fWP
  */
 
-defined( 'ABSPATH' ) or die( 'SAI CAPIROTO xD' );
+defined( 'ABSPATH' ) or die( 'Access Denied' );
 
 const DB_Driver = "";
 const DB_Hostname = "";
@@ -19,6 +19,13 @@ const DB_Name = "";
 const DB_Username = "";
 const DB_Password = "";
 
+
+/**
+ * !! IMPORTANT !!
+ * Remember to change the database, table and param names...
+ * Also, remember to change the product ID too.
+ * Everything that are here is only for test purpose.
+ */
 
 function is_registered( $email ) {
 
