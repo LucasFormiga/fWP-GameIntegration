@@ -29,18 +29,16 @@ const DB_Password = "";
 
 function is_registered( $email ) {
 
-  $consulta = "SELECT * FROM dw_balance WHERE email = :email";
+  $sql = new PDO( DB_Driver . ':host=' . DB_Hostname . ';port=' . DB_Port .';dbname=' . DB_Name, DB_Username, DB_Password );
 
-  $sql = new PDO(DB_Driver . ':host=' . DB_Hostname . ';port=' . DB_Port .';dbname=' . DB_Name, DB_Username, DB_Password);
+  $query = "SELECT player_email FROM dw_balance WHERE player_email = :email"; // You have to change this query to use your game panel or game database and verify if it has the user registered
+  $res = $sql->prepare( $query );
 
-  $set = $sql->prepare($consulta);
+  $res->bindValue(':email', $email, PDO::PARAM_STR);
+  $res->execute();
 
-  $set->bindValue(':email', $email, PDO::PARAM_STR);
-
-  $set->execute();
-
-  if ($set->rowCount() > 0):
-    return true
+  if ($res->rowCount() > 0):
+    return true;
   else:
     return false;
   endif;
@@ -49,11 +47,10 @@ function is_registered( $email ) {
 
 function register_customer( $email ) {
 
-  $consulta = "INSERT INTO `dw_balance` (`email`, `balance`) VALUES (:email, '0')";
+  $sql = new PDO( DB_Driver . ':host=' . DB_Hostname . ';port=' . DB_Port .';dbname=' . DB_Name, DB_Username, DB_Password );
 
-  $sql = new PDO(DB_Driver . ':host=' . DB_Hostname . ';port=' . DB_Port .';dbname=' . DB_Name, DB_Username, DB_Password);
-
-  $set = $sql->prepare($consulta);
+  $query = ""; // You have to change this query to use your game panel or game database to register the user if it is not registered
+  $set = $sql->prepare( $query );
 
   $set->bindValue(':email', $email, PDO::PARAM_STR);
 
@@ -61,15 +58,15 @@ function register_customer( $email ) {
 
 }
 
-function add_balance( $email ) {
+function add_balance( $email, $quantity ) {
 
-  $consulta = "UPDATE ";
+  $sql = new PDO( DB_Driver . ':host=' . DB_Hostname . ';port=' . DB_Port .';dbname=' . DB_Name, DB_Username, DB_Password );
 
-  $sql = new PDO(DB_Driver . ':host=' . DB_Hostname . ';port=' . DB_Port .';dbname=' . DB_Name, DB_Username, DB_Password);
-
-  $set = $sql->prepare($consulta);
+  $query = "UPDATE dw_balance SET coins = :qty WHERE player_email = :email";
+  $set = $sql->prepare( $query );
 
   $set->bindValue(':email', $email, PDO::PARAM_STR);
+  $set->bindValue(':qty', $quantity, PDO::PARAM_INT);
 
   $set->execute();
 
@@ -80,30 +77,26 @@ function execute_when_completed( $order_id ) {
   $get_order = new WC_Order( $order_id );
 
   $items = $get_order->get_items();
-
   $email = $get_order->billing_email;
 
   $coins = 0;
 
   foreach ( $items as $item ):
     switch ( $item['product_id'] ):
+      // Use the case with the product_id to get the product details
       case 157:
         $price = 1000 * $item['qty'];
-        $coins += $price;
-      break;
-      case 133:
-        $price = 500 * $item['qty'];
         $coins += $price;
       break;
     endswitch;
   endforeach;
 
   if ( $coins > 0 ):
-    if (is_registered($email)):
-      add_balance($email);
+    if (is_registered( $email )):
+      add_balance( $email, $coins );
     else:
-      register_customer($email);
-      add_balance($email);
+      register_customer( $email );
+      add_balance( $email, $coins );
     endif;
   endif;
 
